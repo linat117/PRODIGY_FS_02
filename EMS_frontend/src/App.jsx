@@ -17,7 +17,7 @@ import {ProfileContextProvider} from './context/ProfileContext';
 //import DeleteEmployee from './pages/DeleteEmployee'; // Update the import path if necessary
 //import Login from './pages/Login'; // Update the import path if necessary
 //import Register from './pages/Register'; // Update the import path if necessary
-
+import FirstTimeLogin from './FirstTimeLogin';
 function App() {
   return (
     <ProfileContextProvider>
@@ -27,6 +27,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/first-time-login" element={<FirstTimeLogin />} />
         
         {/* Protected Routes - Wrapped with DashboardLayout */}
         <Route path="/dashboard" element={<DashboardLayout />}>

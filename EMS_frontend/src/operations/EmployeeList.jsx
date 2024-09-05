@@ -5,12 +5,11 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { FaRegEye, FaEdit, FaTrash } from 'react-icons/fa';
-
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalEmployees, setTotalEmployees] = useState(0); // To track total count
+  //const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalEmployees, setTotalEmployees] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -19,44 +18,39 @@ function EmployeeList() {
   const [educationLevels] = useState(['High School', 'Associate Degree', 'Bachelor’s Degree', 'Master’s Degree', 'Doctorate']);
   const [updatedEmployee, setUpdatedEmployee] = useState({});
 
+  const [totalPages, setTotalPages] = useState(0); // Total number of pages
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Number of rows per page
+  const [totalRecords, setTotalRecords] = useState(0); 
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees(page + 1, rowsPerPage);
   }, [page, rowsPerPage]);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (page, limit) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/employees', {
-        params: {
-          page: page + 1,
-          limit: rowsPerPage,
-        },
-      });
-      const { employees, totalCount } = response.data; // Assuming totalCount is sent by the backend
+      const response = await axios.get(`http://localhost:5000/api/employees?page=${page}&limit=${limit}`);
+      console.log('API Response:', response.data); // Check the response here
+  
+      const { employees, total } = response.data;
+  const totalPages = Math.ceil(totalRecords / rowsPerPage);
 
-      if (Array.isArray(employees)) {
-        setEmployees(employees);
-        setTotalEmployees(totalCount); // Set the total count of employees
-      } else {
-        console.error('Expected employees to be an array, but got:', employees);
-        setEmployees([]);
-        setTotalEmployees(0); // Set total employees to 0 in case of error
-      }
+      setEmployees(employees || []); // Default to empty array if undefined
+      setTotalRecords(total || 0); // Update to use 'total'
+      setTotalPages(Math.ceil((total || 0) / limit)); // Update to use 'total'
     } catch (error) {
-      console.error('Error fetching employees:', error.response?.data || error.message);
-      setEmployees([]);
-      setTotalEmployees(0); // Set total employees to 0 in case of error
+      console.error('Error fetching employees:', error);
     }
   };
-
+  
   const handleViewDetails = (employee) => {
     setSelectedEmployee(employee);
   };
 
   const handleEditEmployee = (employee) => {
     setEmployeeToUpdate(employee);
-    setUpdatedEmployee(employee); // Initialize form with existing data
+    setUpdatedEmployee({ employee });
     setOpenUpdateDialog(true);
   };
 
@@ -72,7 +66,7 @@ function EmployeeList() {
         setEmployees(employees.filter((employee) => employee._id !== employeeToDelete));
         setOpenDeleteDialog(false);
         setEmployeeToDelete(null);
-        fetchEmployees(); // Re-fetch employees to update the list and pagination
+        fetchEmployees();
       } else {
         console.error('Failed to delete employee:', response.status);
       }
@@ -87,25 +81,41 @@ function EmployeeList() {
 
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedEmployee(prev => ({ ...prev, [name]: value }));
+    if (name === 'dateOfBirth') {
+      // Convert ISO date string to yyyy-MM-dd format
+      const formattedDate = new Date(value).toISOString().split('T')[0];
+      setUpdatedEmployee(prev => ({ ...prev, [name]: formattedDate }));
+    } else {
+      setUpdatedEmployee(prev => ({ ...prev, [name]: value }));
+    }
   };
+  
 
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:5000/api/employees/${employeeToUpdate._id}`, updatedEmployee);
+      console.log('Submitting update for:', updatedEmployee);
+  
+      // Convert date to ISO format if necessary
+      const formattedDate = new Date(updatedEmployee.dateOfBirth).toISOString();
+      const dataToUpdate = { ...updatedEmployee, dateOfBirth: formattedDate };
+  
+      const response = await axios.put(`http://localhost:5000/api/employees/${employeeToUpdate._id}`, dataToUpdate);
+  
       if (response.status === 200) {
         setEmployees(employees.map(emp => emp._id === employeeToUpdate._id ? response.data : emp));
-        setOpenUpdateDialog(false);
-        setEmployeeToUpdate(null);
+        setOpenUpdateDialog(true);
+        setEmployeeToUpdate(employee);
+        
       } else {
         console.error('Failed to update employee:', response.status);
       }
     } catch (error) {
-      console.error('Error updating employee:', error.message);
+      console.error('Error updating employee:', error.response?.data || error.message);
     }
   };
-
+  
+  
   const handleCancelUpdate = () => {
     setOpenUpdateDialog(false);
     setEmployeeToUpdate(null);
@@ -114,11 +124,17 @@ function EmployeeList() {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
+  
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setPage(0); // Reset to the first page
   };
+  
+  console.log('Employees:', employees);
+console.log('Total Records:', totalRecords); // Should reflect the value from API
+console.log('Rows Per Page:', rowsPerPage);
+console.log('Current Page:', page);
+
 
   return (
     <TableContainer component={Paper} style={{ padding: '16px' }}>
@@ -135,7 +151,15 @@ function EmployeeList() {
         </TableHead>
         <TableBody>
           {employees.map((employee, index) => (
-            <TableRow key={employee._id}>
+            <TableRow
+              key={employee._id}
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                  cursor: 'pointer'
+                }
+              }}
+            >
               <TableCell>{page * rowsPerPage + index + 1}</TableCell>
               <TableCell>{employee.name}</TableCell>
               <TableCell>{employee.email}</TableCell>
@@ -165,14 +189,17 @@ function EmployeeList() {
         </TableBody>
       </Table>
       <TablePagination
-  rowsPerPageOptions={[5, 10, 25]}
+  rowsPerPageOptions={[5, 10, 25, 50]}
   component="div"
-  count={totalEmployees} // Use totalEmployees instead of employees.length
+  count={totalRecords} // Ensure count is a number
   rowsPerPage={rowsPerPage}
   page={page}
   onPageChange={handleChangePage}
   onRowsPerPageChange={handleChangeRowsPerPage}
 />
+
+
+
 
 
       {/* Details Dialog */}
@@ -252,6 +279,17 @@ function EmployeeList() {
               fullWidth
               margin="normal"
             />
+           <TextField
+  label="Date of Birth"
+  name="dateOfBirth"
+  type="date"
+  value={updatedEmployee.dateOfBirth ? new Date(updatedEmployee.dateOfBirth).toISOString().split('T')[0] : ''}
+  onChange={handleUpdateChange}
+  fullWidth
+  margin="normal"
+  InputLabelProps={{ shrink: true }}
+/>
+
             <FormControl fullWidth margin="normal">
               <InputLabel>Education Level</InputLabel>
               <Select
@@ -280,28 +318,32 @@ function EmployeeList() {
               fullWidth
               margin="normal"
             />
+            <DialogActions>
+              <Button type="submit" style={{ backgroundColor: '#1c352d', color: 'white' }}>
+                Update
+              </Button>
+              <Button onClick={handleCancelUpdate} style={{ backgroundColor: '#d32f2f', color: 'white' }}>
+                Cancel
+              </Button>
+            </DialogActions>
           </form>
         </DialogContent>
-        <DialogActions>
-          <Button type="submit" style={{ backgroundColor: '#1c352d', color: 'white' }} onClick={handleUpdateSubmit}>
-            Update
-          </Button>
-          <Button onClick={handleCancelUpdate} style={{ backgroundColor: '#d32f2f', color: 'white' }}>
-            Cancel
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
+        maxWidth="sm"
+        fullWidth
       >
-        <DialogTitle style={{ backgroundColor: '#d32f2f', color: 'white' }}>
-          Confirm Deletion
+        <DialogTitle style={{ backgroundColor: '#1c352d', color: 'white' }}>
+          Confirm Delete
         </DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this employee?</Typography>
+          <Typography>
+            Are you sure you want to delete this employee?
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={confirmDeleteEmployee} style={{ backgroundColor: '#d32f2f', color: 'white' }}>

@@ -103,23 +103,7 @@ function DashboardLayout() {
                   <ListItemText primary="Create Employee" sx={{ opacity: open ? 1 : 0, transition: 'opacity 0.3s' }} />
                 </ListItem>
               </Tooltip>
-              <Tooltip title="Promote Employee" placement="right" disableHoverListener={open}>
-                <ListItem button onClick={() => handleListItemClick('/dashboard/promote-employee')}>
-                  <ListItemIcon>
-                    <UpgradeIcon sx={{ color: '#fff' }} />
-                  </ListItemIcon>
-                  <ListItemText primary="Promote Employee" sx={{ opacity: open ? 1 : 0, transition: 'opacity 0.3s' }} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title="My Profile" placement="right" disableHoverListener={open}>
-                <ListItem button onClick={() => handleListItemClick('/dashboard/profile')}>
-                  <ListItemIcon>
-                    <ManageAccountsIcon sx={{ color: '#fff' }} />
-                  </ListItemIcon>
-                  <ListItemText primary="My Profile" sx={{ opacity: open ? 1 : 0, transition: 'opacity 0.3s' }} />
-                </ListItem>
-              </Tooltip>
-            </>
+             </>
           )}
         </List>
       </Drawer>

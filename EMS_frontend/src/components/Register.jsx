@@ -1,5 +1,5 @@
 // frontend/src/components/Register.js
-import React,  { useState } from 'react';
+import React, { useState } from 'react';
 import { register } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,15 +20,15 @@ function Register() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
+      
       const data = await register(formData);
-      console.log(data);
+      console.log('Registration successful:', data);
       navigate('/login');
+      localStorage.setItem('username', response.data.username);
     } catch (error) {
-      console.error(error.response.data.message);
+      console.error('Error during registration:', error.response ? error.response.data : error.message);
     }
-  };
-
-  return (
+  };  return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
         onSubmit={onSubmit}
@@ -47,6 +47,7 @@ function Register() {
             name="username"
             value={username}
             onChange={onChange}
+            autoComplete='username'
             placeholder="Enter your username"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-600 focus:border-emerald-600"
@@ -77,6 +78,7 @@ function Register() {
             name="password"
             value={password}
             onChange={onChange}
+            autoComplete='current-password'
             placeholder="Enter your password"
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-600 focus:border-emerald-600"

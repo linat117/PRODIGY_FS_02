@@ -28,11 +28,12 @@ function CreateEmployee() {
     department: '',
     phone: '',
     address: '',
-    dob: '',
-    education: '',
-    emergencyContact: '',
-    emergencyPhone: '',
+    dateOfBirth: '', // Updated from dob
+    educationLevel: '', // Updated from education
+    emergencyContactName: '', // Updated from emergencyContact
+    emergencyContactPhone: '', // Updated from emergencyPhone
   });
+  
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -61,10 +62,10 @@ function CreateEmployee() {
         department: '',
         phone: '',
         address: '',
-        dob: '',
-        education: '',
-        emergencyContact: '',
-        emergencyPhone: '',
+        dateOfBirth: '',
+        educationLevel: '',
+        emergencyContactName: '',
+        emergencyContactPhone: '',
       });
     } catch (error) {
       if (error.response && error.response.status === 409) {
@@ -82,7 +83,7 @@ function CreateEmployee() {
       }
     }
   };
-
+  
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -158,29 +159,29 @@ function CreateEmployee() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Date of Birth"
-                  name="dob"
-                  value={employeeData.dob}
-                  onChange={handleChange}
-                  type="date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  required
-                />
+              <TextField
+  fullWidth
+  label="Date of Birth"
+  name="dateOfBirth"
+  value={employeeData.dateOfBirth}
+  onChange={handleChange}
+  type="date"
+  InputLabelProps={{
+    shrink: true,
+  }}
+  required
+/>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Education Level"
-                  name="education"
-                  value={employeeData.education}
-                  onChange={handleChange}
-                  required
-                >
+              <TextField
+  fullWidth
+  select
+  label="Education Level"
+  name="educationLevel"
+  value={employeeData.educationLevel}
+  onChange={handleChange}
+  required
+>
                   {educationLevels.map((level) => (
                     <MenuItem key={level} value={level}>
                       {level}
@@ -189,24 +190,24 @@ function CreateEmployee() {
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Emergency Contact Name"
-                  name="emergencyContact"
-                  value={employeeData.emergencyContact}
-                  onChange={handleChange}
-                  required
-                />
+              <TextField
+  fullWidth
+  label="Emergency Contact Name"
+  name="emergencyContactName"
+  value={employeeData.emergencyContactName}
+  onChange={handleChange}
+  required
+/>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Emergency Contact Phone"
-                  name="emergencyPhone"
-                  value={employeeData.emergencyPhone}
-                  onChange={handleChange}
-                  required
-                />
+              <TextField
+  fullWidth
+  label="Emergency Contact Phone"
+  name="emergencyContactPhone"
+  value={employeeData.emergencyContactPhone}
+  onChange={handleChange}
+  required
+/>
               </Grid>
               <Grid item xs={12}>
                 <Box textAlign="center">

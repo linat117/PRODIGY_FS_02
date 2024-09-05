@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { deleteEmployee, getEmployees } from '../services/employeeService';
 
 function DeleteEmployee() {
   const [email, setEmail] = useState('');
